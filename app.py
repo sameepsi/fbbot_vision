@@ -55,7 +55,7 @@ def webhook():
                                 videoCount=videoCount+1
                             if attachment["type"]=="file":
                                 fileCount=fileCount+1
-        message_text="text:"+message_text+"/n"+"images:"+imageCount+"/n"+"audio:"+audioCount+"/n"+"video:"+videoCount+"/n"+"file:"+fileCount
+        message_text="text:"+message_text+"/n"+"images:"+str(imageCount)+"/n"+"audio:"+str(audioCount)+"/n"+"video:"+str(videoCount)+"/n"+"file:"+str(fileCount)
         send_message(sender_id, message_text)        
 
     return "ok", 200
