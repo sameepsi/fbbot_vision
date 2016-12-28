@@ -7,14 +7,19 @@ from flask import Flask, request
 
 #Flask is a web framework to develop python web apps
 app = Flask(__name__)
-
+fb_tokens={}
 
 @app.route('/', methods=['GET'])
 def verify():
+    global fb_tokens
+    with open("tokenFile") as tokenFile:
+        for line in tokenFile:
+            key,value=line.partition("=")[::2]
+            fb_tokens[key]=value.strip()
     # when we register a webhook, we need to verify the authenticity of the fb server
     # the 'hub.challenge' value it receives in the query arguments
     if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.challenge"):
-        if not request.args.get("hub.verify_token") == os.environ["VERIFY_TOKEN"]:
+        if not request.args.get("hub.verify_token") == unicode(fb_tokens["verify.token"]):
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
 
@@ -42,7 +47,6 @@ def webhook():
                 if messaging_event.get("message"):  # someone sent us a message
                     message=messaging_event.get("message")
                     sender_id = messaging_event["sender"]["id"]        # the facebook ID of the person who sent the message
-                    recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
                     if message.get("text"):
                         message_text=message.get("text")
                     if message.get("attachments"):
@@ -66,7 +70,7 @@ def send_message(recipient_id, message_text):
     log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
 
     params = {
-        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
+        "access_token": fb_tokens["access.token"]
     }
     headers = {
         "Content-Type": "application/json"
