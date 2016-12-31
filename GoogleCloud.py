@@ -3,8 +3,10 @@ import oauth2client
 import oauth2client.client
 from oauth2client.client import GoogleCredentials
 from oauth2client.client import ApplicationDefaultCredentialsError
+import ast
 def getCredentials():
-    client_credentials=os.environ["GOOGLE_CLOUD_CREDENTIALS"]
+    client_credentials_str=os.environ["GOOGLE_CLOUD_CREDENTIALS"]
+    client_credentials=ast.literal_eval(client_credentials_str)
     if client_credentials is not None:
         credentials_type = client_credentials.get('type')
         if credentials_type == oauth2client.client.AUTHORIZED_USER:
