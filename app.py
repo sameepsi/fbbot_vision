@@ -4,18 +4,22 @@ import json
 
 import requests
 from flask import Flask, request
+from Vision import detect_face
 
 #Flask is a web framework to develop python web apps
 app = Flask(__name__)
 fb_tokens={}
 
-@app.route('/', methods=['GET'])
-def verify():
+def readToken():
     global fb_tokens
     with open("tokenFile") as tokenFile:
         for line in tokenFile:
             key,value=line.partition("=")[::2]
             fb_tokens[key]=value.strip()
+
+@app.route('/', methods=['GET'])
+def verify():
+    readToken()
     # when we register a webhook, we need to verify the authenticity of the fb server
     # the 'hub.challenge' value it receives in the query arguments
     if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.challenge"):
@@ -28,8 +32,9 @@ def verify():
 # endpoint for processing incoming messaging events
 @app.route('/', methods=['POST'])
 def webhook():
-
+    readToken()
     imageCount=0
+    facesCount=0
     videoCount=0
     audioCount=0
     fileCount=0
@@ -53,20 +58,23 @@ def webhook():
                         for attachment in message.get("attachments"):
                             if attachment["type"]=="image":
                                 imageCount=imageCount+1
+                                faces= detect_face(attachment["payload"]["url"])
+                                if faces is not None:
+                                    facesCount=len(faces)
                             if attachment["type"]=="audio":
                                 audioCount=audioCount+1
                             if attachment["type"]=="video":
                                 videoCount=videoCount+1
                             if attachment["type"]=="file":
                                 fileCount=fileCount+1
-        message_text="text:"+message_text+"\n"+"images:"+str(imageCount)+"\n"+"audio:"+str(audioCount)+"\n"+"video:"+str(videoCount)+"\n"+"file:"+str(fileCount)
+        message_text="text:"+message_text+"\n"+"images:"+str(imageCount)+"\n"+"audio:"+str(audioCount)+"\n"+"video:"+str(videoCount)+"\n"+"file:"+str(fileCount)+"\n"+"faces:"+str(facesCount)
         send_message(sender_id, message_text)        
 
     return "ok", 200
 
 
 def send_message(recipient_id, message_text):
-
+    readToken()
     log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
 
     params = {
