@@ -60,7 +60,8 @@ def webhook():
                                 imageCount=imageCount+1
                                 faces= detect_face(attachment["payload"]["url"])
                                 if faces is not None:
-                                    facesCount=len(faces)
+                                    for face in faces:
+                                        facesCount=facesCount+1
                             if attachment["type"]=="audio":
                                 audioCount=audioCount+1
                             if attachment["type"]=="video":

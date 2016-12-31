@@ -11,9 +11,9 @@ import urllib2
 import cStringIO
 
 def get_vision_service():
-    credentials=GoogleCredentials.get_application_default()
-    if credentials is None:
-        credentials=getCredentials()
+    # credentials=GoogleCredentials.get_application_default()
+    #if credentials is None:
+    credentials=getCredentials()
     return discovery.build('vision', 'v1', credentials=credentials)
 
 def detect_face(image_URL,max_result=3):
