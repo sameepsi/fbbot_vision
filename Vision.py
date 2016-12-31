@@ -16,7 +16,7 @@ def get_vision_service():
         credentials=getCredentials()
     return discovery.build('vision', 'v1', credentials=credentials)
 
-def detect_face(image_URL,max_result=20):
+def detect_face(image_URL,max_result=3):
     image_file=cStringIO.StringIO(urllib2.urlopen(image_URL).read())
     batch_request=[{
         'image':{
