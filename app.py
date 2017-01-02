@@ -8,22 +8,13 @@ from Vision import detect_face
 
 #Flask is a web framework to develop python web apps
 app = Flask(__name__)
-fb_tokens={}
-
-def readToken():
-    global fb_tokens
-    with open("tokenFile") as tokenFile:
-        for line in tokenFile:
-            key,value=line.partition("=")[::2]
-            fb_tokens[key]=value.strip()
 
 @app.route('/', methods=['GET'])
 def verify():
-    readToken()
     # when we register a webhook, we need to verify the authenticity of the fb server
     # the 'hub.challenge' value it receives in the query arguments
     if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.challenge"):
-        if not request.args.get("hub.verify_token") == unicode(fb_tokens["verify.token"]):
+        if not request.args.get("hub.verify_token") == unicode(os.environ["VERIFY_TOKEN"]):
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
 
@@ -32,7 +23,6 @@ def verify():
 # endpoint for processing incoming messaging events
 @app.route('/', methods=['POST'])
 def webhook():
-    readToken()
     imageCount=0
     facesCount=0
     videoCount=0
@@ -75,11 +65,10 @@ def webhook():
 
 
 def send_message(recipient_id, message_text):
-    readToken()
     log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
 
     params = {
-        "access_token": fb_tokens["access.token"]
+        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
     }
     headers = {
         "Content-Type": "application/json"
