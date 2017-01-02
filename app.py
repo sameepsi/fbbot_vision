@@ -12,9 +12,11 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def verify():
     # when we register a webhook, we need to verify the authenticity of the fb server
-    # the 'hub.challenge' value it receives in the query arguments
+    # the 'hub.challenge' value it receives in the query arguments    
+    localToken=unicode(os.environ.get("VERIFY_TOKEN",None))
+
     if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.challenge"):
-        if not request.args.get("hub.verify_token") == unicode(os.environ["VERIFY_TOKEN"]):
+        if not request.args.get("hub.verify_token") ==localToken :
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
 
@@ -68,7 +70,7 @@ def send_message(recipient_id, message_text):
     log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
 
     params = {
-        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
+        "access_token": os.environ.get("PAGE_ACCESS_TOKEN",None)
     }
     headers = {
         "Content-Type": "application/json"
