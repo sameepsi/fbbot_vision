@@ -34,10 +34,9 @@ def detect_face(image_URL,max_result=30):
         'requests':batch_request
         })
     response=request.execute()
-    jsonData=json.load(response)
-    if "responses" not in jsonData:
+    if "responses" not in response:
         return None
-    if "faceAnnotations" not in jsonData["responses"][0]:
+    if "faceAnnotations" not in response["responses"][0]:
         return None
     return response["responses"][0]["faceAnnotations"]
     
