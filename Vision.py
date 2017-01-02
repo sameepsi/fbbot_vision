@@ -9,6 +9,7 @@ from GoogleCloud import getCredentials
 import base64
 import urllib2
 import cStringIO
+import json
 
 def get_vision_service():
     # credentials=GoogleCredentials.get_application_default()
@@ -33,6 +34,11 @@ def detect_face(image_URL,max_result=30):
         'requests':batch_request
         })
     response=request.execute()
+    jsonData=json.load(response)
+    if "responses" not in jsonData:
+        return None
+    if "faceAnnotations" not in jsonData["responses"][0]:
+        return None
     return response["responses"][0]["faceAnnotations"]
     
     
